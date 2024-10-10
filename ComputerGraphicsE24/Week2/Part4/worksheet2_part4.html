@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2 - Part 4</title>
+</head>
+<body>
+    <canvas id="glCanvas" width="512" height="512"></canvas>
+    <div>
+        <button id="clearCanvas">Clear Canvas</button>
+        <label for="clearColor">Clear Color:</label>
+        <select id="clearColor">
+            <option value="0">Black</option>
+            <option value="1">Red</option>
+            <option value="2">Green</option>
+            <option value="3">Blue</option>
+            <option value="4">Yellow</option>
+            <option value="5">Magenta</option>
+            <option value="6">Cyan</option>
+            <option value="7">White</option>
+        </select>
+
+        <label for="pointColor">Point Color:</label>
+        <select id="pointColor">
+            <option value="0">Black</option>
+            <option value="1">Red</option>
+            <option value="2">Green</option>
+            <option value="3">Blue</option>
+            <option value="4">Yellow</option>
+            <option value="5">Magenta</option>
+            <option value="6">Cyan</option>
+            <option value="7">White</option>
+        </select>
+
+        <button id="drawPointsMode">Draw Points Mode</button>
+        <button id="drawTrianglesMode">Draw Triangles Mode</button>
+        <button id="drawCircleMode">Draw Circle Mode</button>
+
+    </div>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec4 vColor;
+        varying vec4 fColor;
+        void main() {
+            gl_Position = vPosition;
+            gl_PointSize = 10.0; 
+            fColor = vColor;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 fColor;
+        void main() {
+            gl_FragColor = fColor;
+        }
+    </script>
+
+    <script src="../../../angelCommon/webgl-utils.js"></script>
+    <script src="../../../angelCommon/initShaders.js"></script>
+
+    <script src="worksheet2_part4.js"></script>
+</body>
+</html>

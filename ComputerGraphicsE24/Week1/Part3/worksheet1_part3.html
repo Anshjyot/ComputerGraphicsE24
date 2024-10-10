@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 - Part 3</title>
+</head>
+<body>
+    <canvas id="glCanvas" width="512" height="512"></canvas>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec4 vColor;
+        varying vec4 fColor;
+        void main() {
+            gl_Position = vPosition;
+            fColor = vColor; 
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 fColor;
+        void main() {
+            gl_FragColor = fColor; 
+        }
+    </script>
+
+
+    <script src="../../../angelCommon/webgl-utils.js"></script>
+    <script src="../../../angelCommon/initShaders.js"></script>
+
+
+    <script src="worksheet1_part3.js"></script> 
+</body>
+</html>
