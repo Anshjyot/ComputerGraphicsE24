@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 6 - Part 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        canvas {
+            margin-top: 20px;
+            border: 1px solid #ffffff;
+        }
+        h1 {
+            color: #ffcc00;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Texture Wrapping & Filtering</h1>
+    <canvas id="glCanvas" width="512" height="512"></canvas>
+
+    <div class="controls">
+        <label for="wrapMode">Texture Wrapping Mode: </label>
+        <select id="wrapMode">
+            <option value="REPEAT">Repeat</option>
+            <option value="CLAMP_TO_EDGE">Clamp to Edge</option>
+        </select>
+
+        <label for="filterMode">Texture Filtering Mode: </label>
+        <select id="filterMode">
+            <option value="NEAREST">Nearest</option>
+            <option value="LINEAR">Linear</option>
+            <option value="NEAREST_MIPMAP_NEAREST">Nearest Mipmap Nearest</option>
+            <option value="LINEAR_MIPMAP_NEAREST">Linear Mipmap Nearest</option>
+            <option value="NEAREST_MIPMAP_LINEAR">Nearest Mipmap Linear</option>
+            <option value="LINEAR_MIPMAP_LINEAR">Linear Mipmap Linear</option>
+        </select>
+    </div>
+
+    <script src="../../../angelCommon/webgl-utils.js"></script>
+    <script src="../../../angelCommon/initShaders.js"></script>
+    <script src="../../../angelCommon/mv.js"></script>
+    <script src="worksheet6_part2.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec2 vTexCoord;
+        varying vec2 fTexCoord;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+
+        void main() {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vPosition;
+            fTexCoord = vTexCoord; 
+        }
+    </script>
+
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec2 fTexCoord;
+        uniform sampler2D uTexture;
+
+        void main() {
+            gl_FragColor = texture2D(uTexture, fTexCoord); 
+        }
+    </script>
+</body>
+</html>

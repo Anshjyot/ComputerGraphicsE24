@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Week 4 - Part 2</title>
+</head>
+<body>
+    <canvas id="glCanvas" width="512" height="512"></canvas>
+    <br>
+    <button id="increaseSubdivision">Increase Subdivision</button>
+    <button id="decreaseSubdivision">Decrease Subdivision</button>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        varying vec4 fColor;
+        uniform mat4 uProjectionMatrix;
+        uniform mat4 uModelViewMatrix;
+
+        void main() {
+            // Set color based on position (c = 0.5 * p + 0.5)
+            fColor = vec4(0.5 * vPosition.xyz + 0.5, 1.0);
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vPosition;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 fColor;
+        void main() {
+            gl_FragColor = fColor; 
+        }
+    </script>
+
+    <script src="../../../angelCommon/webgl-utils.js"></script>
+    <script src="../../../angelCommon/initShaders.js"></script>
+    <script src="../../../angelCommon/mv.js"></script> 
+    <script src="worksheet4_part2.js"></script>
+</body>
+</html>

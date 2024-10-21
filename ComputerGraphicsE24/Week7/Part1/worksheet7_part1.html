@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Cube Map Environment Mapping</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        canvas {
+            margin-top: 20px;
+            border: 1px solid #ffffff;
+        }
+        h1 {
+            color: #ffcc00;
+        }
+        .explanation {
+            max-width: 400px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        h2 {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Cube Map Environment Mapping</h1>
+        <canvas id="glCanvas" width="512" height="512"></canvas>
+    </div>
+
+    <!-- Vertex Shader -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 vPosition;
+        attribute vec3 vNormal;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+        varying vec3 fNormal;     
+        varying vec3 vReflectDir;  
+        
+        void main() {
+            vec4 pos = uModelViewMatrix * vec4(vPosition, 1.0);
+            gl_Position = uProjectionMatrix * pos;
+            vec3 normal = normalize(mat3(uModelViewMatrix) * vNormal);
+            vReflectDir = reflect(normalize(pos.xyz), normal);
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec3 vReflectDir; 
+        uniform samplerCube uCubeMap;
+        
+        void main() {
+            gl_FragColor = textureCube(uCubeMap, vReflectDir);
+        }
+    </script>
+
+   
+    <script src="../../../angelCommon/webgl-utils.js"></script>
+    <script src="../../../angelCommon/initShaders.js"></script>
+    <script src="../../../angelCommon/mv.js"></script>
+    <script src="worksheet7_part1.js"></script>
+</body>
+</html>

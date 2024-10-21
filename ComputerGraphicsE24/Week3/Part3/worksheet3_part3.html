@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 3 - Part 3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        h1, h2, h3, h4 {
+            color: #ffcc00;
+        }
+        a {
+            color: #ffcc00;
+        }
+        pre {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #ffcc00;
+        }
+        code {
+            background-color: #444;
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #ffcc00;
+        }
+        ul, li {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Part 3:</h1>
+
+    <h2>Transformation Matrices Used:</h2>
+    <p>
+        We applied different affine transformations to manipulate the unit cubes' positions and orientations. These transformations involve the following types of matrices:
+    </p>
+
+    <h3>1. Translation Matrix (T):</h3>
+    <p>Translation moves the cube to a new position in the scene. The translation matrix is of the form:</p>
+
+    <pre>
+    T(Δx, Δy, Δz) = 
+    ⎡ 1  0  0  Δx ⎤
+    ⎢ 0  1  0  Δy ⎥
+    ⎢ 0  0  1  Δz ⎥
+    ⎢ 0  0  0   1 ⎥
+    </pre>
+
+    <p>In the code, translation is used to place each cube in different locations:</p>
+    <ul>
+        <li>For the center cube (one-point perspective): <code>T(0.0, 0.0, -5.0)</code></li>
+        <li>For the left cube (two-point perspective): <code>T(-2.0, 0.0, -6.0)</code></li>
+        <li>For the right cube (three-point perspective): <code>T(2.0, 0.0, -7.0)</code></li>
+    </ul>
+
+    <h3>2. Rotation Matrices (R):</h3>
+    <p>Rotation matrices rotate the cube around the X, Y, or Z axis. The general form of a rotation matrix about an axis is:</p>
+
+    <p><strong>Rotation around the X-axis by angle θ:</strong></p>
+    <pre>
+    Rx(θ) = 
+    ⎡ 1     0         0    0 ⎤
+    ⎢ 0  cos(θ)  -sin(θ)  0 ⎥
+    ⎢ 0  sin(θ)   cos(θ)  0 ⎥
+    ⎢ 0     0         0    1 ⎥
+    </pre>
+
+    <p><strong>Rotation around the Y-axis by angle θ:</strong></p>
+    <pre>
+    Ry(θ) = 
+    ⎡ cos(θ)  0  sin(θ)  0 ⎤
+    ⎢ 0       1    0     0 ⎥
+    ⎢-sin(θ)  0  cos(θ)  0 ⎥
+    ⎢ 0       0    0     1 ⎥
+    </pre>
+
+    <p><strong>Rotation around the Z-axis by angle θ:</strong></p>
+    <pre>
+    Rz(θ) = 
+    ⎡ cos(θ) -sin(θ)  0  0 ⎤
+    ⎢ sin(θ)  cos(θ)  0  0 ⎥
+    ⎢  0         0    1  0 ⎥
+    ⎢  0         0    0  1 ⎥
+    </pre>
+
+    <p>In the code:</p>
+    <ul>
+        <li>The center cube has minimal to no rotation, representing a one-point perspective.</li>
+        <li>The left cube is rotated along the Y-axis for a two-point perspective using <code>Ry(30°)</code>.</li>
+        <li>The right cube is rotated along both the X-axis and the Y-axis for a three-point perspective using:
+            <ul>
+                <li><code>Rx(30°)</code></li>
+                <li><code>Ry(30°)</code></li>
+                <li>There is also a slight rotation along the Z-axis to give a more realistic perspective effect with <code>Rz(15°)</code>.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>3. Projection Matrix (P):</h3>
+    <p>
+        The projection matrix creates the perspective effect, where objects farther from the camera appear smaller. 
+        The projection matrix used is a perspective projection matrix, defined by:
+    </p>
+    <pre>P = perspective(fov, aspect, near, far)</pre>
+
+    <p>Where:</p>
+    <ul>
+        <li><strong>fov</strong> is the field of view angle in degrees (45° in this case).</li>
+        <li><strong>aspect</strong> is the aspect ratio of the canvas (width/height).</li>
+        <li><strong>near</strong> and <strong>far</strong> are the distances to the near and far clipping planes.</li>
+    </ul>
+
+    <p>In the code, the projection matrix is initialized as:</p>
+    <pre>P = perspective(45, canvas.width / canvas.height, 0.1, 10.0)</pre>
+
+    <h3>Transformation Sequence (Concatenation of Matrices):</h3>
+    <p>For each cube, a series of transformations were applied by multiplying the matrices in the correct order. Here's how the Current Transformation Matrix (CTM) was constructed for each cube:</p>
+
+    <h4>1. Center Cube (One-point Perspective):</h4>
+    <p>Transformation: Translation Only. The CTM is simply the translation matrix to move the cube back along the Z-axis.</p>
+    <pre>CTM_center = T(0.0, 0.0, -5.0)</pre>
+
+    <h4>2. Left Cube (Two-point Perspective):</h4>
+    <p>Transformation: Translation and Rotation along the Y-axis. The concatenated transformation matrix is:</p>
+    <pre>CTM_left = T(-2.0, 0.0, -6.0) × Ry(30°)</pre>
+
+    <h4>3. Right Cube (Three-point Perspective):</h4>
+    <p>Transformation: Translation, Rotation along X-axis, Rotation along Y-axis, and Rotation along Z-axis.</p>
+    <pre>CTM_right = T(2.0, 0.0, -7.0) × Rx(30°) × Ry(30°) × Rz(15°)</pre>
+
+    <h3>Summary</h3>
+    <p>Matrix multiplication is non-commutative, meaning the order of the transformations matters. The operations are performed in reverse order when building the final transformation matrix:</p>
+    <ul>
+        <li>First, the cube is translated into position.</li>
+        <li>Then, the appropriate rotations are applied.</li>
+        <li>Finally, the resulting matrix is multiplied by the projection matrix to produce the correct view in camera coordinates.</li>
+    </ul>
+
+</body>
+</html>
