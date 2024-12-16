@@ -6,6 +6,73 @@ window.onload = function() {
         return;
     }
 
+    // ---------------- Quaternion Class ----------------
+    class Quaternion {
+        constructor(w = 1, x = 0, y = 0, z = 0) {
+            this.w = w;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        make_rot_angle_axis(angle, axis) {
+            var halfAngle = angle / 2;
+            var sinHalfAngle = Math.sin(halfAngle);
+            this.w = Math.cos(halfAngle);
+            this.x = axis[0] * sinHalfAngle;
+            this.y = axis[1] * sinHalfAngle;
+            this.z = axis[2] * sinHalfAngle;
+            return this;
+        }
+
+        multiply(q) {
+            var w = this.w * q.w - this.x * q.x - this.y * q.y - this.z * q.z;
+            var x = this.w * q.x + this.x * q.w + this.y * q.z - this.z * q.y;
+            var y = this.w * q.y - this.x * q.z + this.y * q.w + this.z * q.x;
+            var z = this.w * q.z + this.x * q.y - this.y * q.x + this.z * q.w;
+            this.w = w;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            return this;
+        }
+
+        normalize() {
+            var len = Math.sqrt(this.w*this.w + this.x*this.x + this.y*this.y + this.z*this.z);
+            if (len > 0.000001) {
+                this.w /= len;
+                this.x /= len;
+                this.y /= len;
+                this.z /= len;
+            }
+            return this;
+        }
+
+        get_mat4() {
+            var ww = this.w * this.w;
+            var xx = this.x * this.x;
+            var yy = this.y * this.y;
+            var zz = this.z * this.z;
+
+            var wx = this.w * this.x;
+            var wy = this.w * this.y;
+            var wz = this.w * this.z;
+
+            var xy = this.x * this.y;
+            var xz = this.x * this.z;
+            var yz = this.y * this.z;
+
+            return [
+                1 - 2 * (yy + zz),  2 * (xy - wz),      2 * (xz + wy),      0,
+                2 * (xy + wz),      1 - 2 * (xx + zz),  2 * (yz - wx),      0,
+                2 * (xz - wy),      2 * (yz + wx),      1 - 2 * (xx + yy), 0,
+                0,                  0,                  0,                  1
+            ];
+        }
+    }
+    // ---------------------------------------------------
+
+    // ---------------- Vector Utilities ----------------
     function vec3Cross(a, b) {
         return [
             a[1] * b[2] - a[2] * b[1],
@@ -26,6 +93,17 @@ window.onload = function() {
         return [x, y, z];
     }
 
+    function normalizeVector(v) {
+        var length = vec3Length(v);
+        if (length > 0.000001) {
+            return [v[0] / length, v[1] / length, v[2] / length];
+        } else {
+            return [0, 0, 0];
+        }
+    }
+
+    // ---------------------------------------------------
+
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0.0, 0.0, 1.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -43,6 +121,7 @@ window.onload = function() {
         return new Float32Array(flat);
     }
 
+    // Vertex Buffer
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     var flatVertices = flattenVec3(sphereData.vertices);
@@ -52,6 +131,7 @@ window.onload = function() {
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
+    // Normal Buffer
     var nBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
     var flatNormals = flattenVec3(sphereData.normals);
@@ -61,10 +141,12 @@ window.onload = function() {
     gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vNormal);
 
+    // Projection Matrix
     var projectionMatrix = perspective(45, canvas.width / canvas.height, 0.1, 100.0);
     var uProjectionMatrix = gl.getUniformLocation(program, "uProjectionMatrix");
     gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
 
+    // Lighting Uniforms
     var uLightDirection = gl.getUniformLocation(program, "uLightDirection");
     gl.uniform3fv(uLightDirection, vec3(1.0, 1.0, -1.0));
 
@@ -77,6 +159,7 @@ window.onload = function() {
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
+    // Texture Setup
     var texture = gl.createTexture();
     var image = new Image();
     image.src = "../../../assets/earth.jpg";
@@ -100,6 +183,7 @@ window.onload = function() {
         render();
     };
 
+    // Interaction Modes
     var InteractionMode = {
         ORBIT: 'orbit',
         DOLLY: 'dolly',
@@ -131,14 +215,15 @@ window.onload = function() {
         setActiveButton(panBtn);
     });
 
+    // Camera Parameters
     var eyeDistance = 3.0;
     var lookAtDisplacement = vec3(0.0, 0.0, 0.0);
     var currentQuaternion = new Quaternion();
-    var viewMatrix = lookAt(vec3(0, 0, eyeDistance), vec3(0, 0, 0), vec3(0, 1, 0));
     var uModelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
 
     var isMouseDown = false;
-    var lastMousePos = null;
+    var lastMouseX = 0;
+    var lastMouseY = 0;
 
     function getMouseProjection(x, y) {
         var rect = canvas.getBoundingClientRect();
@@ -150,96 +235,128 @@ window.onload = function() {
         if (length <= radius * radius) {
             z = Math.sqrt(radius * radius - length);
         } else {
-            var norm = Math.sqrt(length);
-            mouseX *= radius / norm;
-            mouseY *= radius / norm;
+            mouseX *= radius / Math.sqrt(length);
+            mouseY *= radius / Math.sqrt(length);
         }
-        return vec3(mouseX, mouseY, z);
+        return normalizeVector([mouseX, mouseY, z]);
     }
     
+
+    // Mouse Event Handlers
     canvas.addEventListener('mousedown', function(event) {
         isMouseDown = true;
-        lastMousePos = getMouseProjection(event.clientX, event.clientY);
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
     });
 
     canvas.addEventListener('mouseup', function() {
         isMouseDown = false;
-        lastMousePos = null;
+    });
+
+    canvas.addEventListener('mouseleave', function() {
+        isMouseDown = false;
     });
 
     canvas.addEventListener('mousemove', function(event) {
         if (!isMouseDown) return;
-        var newMousePos = getMouseProjection(event.clientX, event.clientY);
-        if (lastMousePos) {
-            var deltaX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-            var deltaY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-            switch(currentMode) {
-                case InteractionMode.ORBIT:
-                    var axis = vec3Cross(lastMousePos, newMousePos);
-                    var dotProduct = vec3Dot(lastMousePos, newMousePos) / (vec3Length(lastMousePos) * vec3Length(newMousePos));
-                    dotProduct = Math.max(-1, Math.min(1, dotProduct));
-                    var angle = Math.acos(dotProduct);
-                    if (vec3Length(axis) > 0.0001) {
-                        var rotationQuat = new Quaternion().make_rot_angle_axis(angle, axis);
-                        currentQuaternion.multiply(rotationQuat);
-                        currentQuaternion.normalize();
-                    }
-                    break;
-                case InteractionMode.DOLLY:
-                    var dollySpeed = 0.01;
-                    eyeDistance += deltaY * dollySpeed;
-                    eyeDistance = Math.max(1.0, Math.min(20.0, eyeDistance));
-                    break;
-                case InteractionMode.PAN:
-                    var panSpeed = 0.005 * eyeDistance;
-                    var rotationMatrix = currentQuaternion.get_mat4();
-                    var right = [rotationMatrix[0], rotationMatrix[1], rotationMatrix[2]];
-                    var up = [rotationMatrix[4], rotationMatrix[5], rotationMatrix[6]];
-                    right = normalizeVector(right);
-                    up = normalizeVector(up);
-                    if (!isValidVector(right) || !isValidVector(up)) {
-                        currentQuaternion = new Quaternion();
-                        break;
-                    }
-                    lookAtDisplacement = [
-                        lookAtDisplacement[0] - deltaX * panSpeed * right[0] - deltaY * panSpeed * up[0],
-                        lookAtDisplacement[1] - deltaX * panSpeed * right[1] - deltaY * panSpeed * up[1],
-                        lookAtDisplacement[2] - deltaX * panSpeed * right[2] - deltaY * panSpeed * up[2]
-                    ];
-                    break;
-            }
-            lastMousePos = newMousePos;
+
+        var currentMouseX = event.clientX;
+        var currentMouseY = event.clientY;
+
+        var deltaX = currentMouseX - lastMouseX;
+        var deltaY = currentMouseY - lastMouseY;
+
+        lastMouseX = currentMouseX;
+        lastMouseY = currentMouseY;
+
+        switch(currentMode) {
+            case InteractionMode.ORBIT:
+                // Sensitivity factor
+                var orbitSensitivity = 0.005;
+                var angleX = deltaY * orbitSensitivity;
+                var angleY = deltaX * orbitSensitivity;
+
+                // Create quaternions for rotations around the camera's right and up vectors
+                var rotationQuatX = new Quaternion().make_rot_angle_axis(angleX, [1, 0, 0]);
+                var rotationQuatY = new Quaternion().make_rot_angle_axis(angleY, [0, 1, 0]);
+
+                // Apply rotations
+                currentQuaternion.multiply(rotationQuatX);
+                currentQuaternion.multiply(rotationQuatY);
+                currentQuaternion.normalize();
+                break;
+
+            case InteractionMode.DOLLY:
+                // Sensitivity factor
+                var dollySensitivity = 0.01;
+                eyeDistance += deltaY * dollySensitivity;
+                eyeDistance = Math.max(1.0, Math.min(20.0, eyeDistance));
+                break;
+
+            case InteractionMode.PAN:
+                // Sensitivity factor
+                var panSensitivity = 0.005 * eyeDistance;
+
+                // Get rotation matrix from quaternion
+                var rotationMatrix = currentQuaternion.get_mat4();
+
+                // Extract right and up vectors from the rotation matrix
+                var right = normalizeVector([rotationMatrix[0], rotationMatrix[1], rotationMatrix[2]]);
+                var up = normalizeVector([rotationMatrix[4], rotationMatrix[5], rotationMatrix[6]]);
+
+                // Update lookAtDisplacement based on mouse movement
+                lookAtDisplacement = [
+                    lookAtDisplacement[0] - deltaX * panSensitivity * right[0] - deltaY * panSensitivity * up[0],
+                    lookAtDisplacement[1] - deltaX * panSensitivity * right[1] - deltaY * panSensitivity * up[1],
+                    lookAtDisplacement[2] - deltaX * panSensitivity * right[2] - deltaY * panSensitivity * up[2]
+                ];
+                break;
         }
     });
-    
-    function normalizeVector(v) {
-        var length = vec3Length(v);
-        if (length > 0.0001) {
-            return [v[0] / length, v[1] / length, v[2] / length];
-        } else {
-            return [0, 0, 0];
-        }
-    }
-    
-    function isValidVector(v) {
-        return v.every(component => !isNaN(component) && isFinite(component));
-    }
 
+    // Render Loop
     function render() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Get rotation matrix from quaternion
         var rotationMatrix = currentQuaternion.get_mat4();
-        var eyeDirection = mult(rotationMatrix, vec4(0, 0, eyeDistance, 0));
+
+        // Calculate eye direction
+        var eyeDirection = [
+            rotationMatrix[0] * 0 + rotationMatrix[4] * 0 + rotationMatrix[8] * eyeDistance,
+            rotationMatrix[1] * 0 + rotationMatrix[5] * 0 + rotationMatrix[9] * eyeDistance,
+            rotationMatrix[2] * 0 + rotationMatrix[6] * 0 + rotationMatrix[10] * eyeDistance
+        ];
+
+        // Calculate eye position
         var eyePosition = [
             lookAtDisplacement[0] + eyeDirection[0],
             lookAtDisplacement[1] + eyeDirection[1],
             lookAtDisplacement[2] + eyeDirection[2]
         ];
-        viewMatrix = lookAt(eyePosition, lookAtDisplacement, vec3(0, 1, 0));
+
+        // Calculate rotated up vector
+        var rotatedUp = [
+            rotationMatrix[4],
+            rotationMatrix[5],
+            rotationMatrix[6]
+        ];
+        var rotatedUpNormalized = normalizeVector(rotatedUp);
+        if (vec3Length(rotatedUpNormalized) < 0.000001) {
+            // Fallback if something is off
+            rotatedUpNormalized = [0, 1, 0];
+        }
+
+        // Create view matrix
+        var viewMatrix = lookAt(eyePosition, lookAtDisplacement, rotatedUpNormalized);
         gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(viewMatrix));
+
+        // Draw the sphere
         gl.drawArrays(gl.TRIANGLES, 0, sphereData.vertices.length);
         requestAnimationFrame(render);
     }
-    
+
+    // Sphere Generation
     function generateSphere(radius, rows, columns) {
         var vertices = [];
         var normals = [];
@@ -271,6 +388,7 @@ window.onload = function() {
                 var first = (latNumber * (columns + 1)) + longNumber;
                 var second = first + columns + 1;
 
+                // First triangle
                 sphereVertices.push(vertices[first]);
                 sphereVertices.push(vertices[second]);
                 sphereVertices.push(vertices[first + 1]);
@@ -279,6 +397,7 @@ window.onload = function() {
                 sphereNormals.push(normals[second]);
                 sphereNormals.push(normals[first + 1]);
 
+                // Second triangle
                 sphereVertices.push(vertices[second]);
                 sphereVertices.push(vertices[second + 1]);
                 sphereVertices.push(vertices[first + 1]);
