@@ -24,9 +24,8 @@ window.onload = function () {
     var canvas = document.getElementById("glCanvas");
     var gl = WebGLUtils.setupWebGL(canvas);
 
-
     document.getElementById("clearColor").selectedIndex = 0;
-    document.getElementById("pointColor").selectedIndex = 0;
+    document.getElementById("pointColor").selectedIndex = 7;
 
     var clearColors = [
         [0.0, 0.0, 0.0, 1.0],
@@ -36,7 +35,7 @@ window.onload = function () {
         [1.0, 1.0, 0.0, 1.0],
         [1.0, 0.0, 1.0, 1.0],
         [0.0, 1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0, 1.0] 
+        [1.0, 1.0, 1.0, 1.0]
     ];
 
     var pointColors = [
@@ -47,15 +46,15 @@ window.onload = function () {
         [1.0, 1.0, 0.0, 1.0],
         [1.0, 0.0, 1.0, 1.0],
         [0.0, 1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0, 1.0] 
+        [1.0, 1.0, 1.0, 1.0]
     ];
 
-    var currentClearColor = 0;
-    var currentPointColor = 0;
-    var drawMode = 'POINTS'; 
-    var firstCirclePoint = null; 
-    var firstCircleColor = null; 
-    var tempPoints = []; 
+    var currentClearColor = 0; // Default clear color index
+    var currentPointColor = 7;
+    var drawMode = 'POINTS';
+    var firstCirclePoint = null;
+    var firstCircleColor = null;
+    var tempPoints = [];
     var points = [];
     var pointColorsList = [];
     var triangles = [];
@@ -76,8 +75,13 @@ window.onload = function () {
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
 
+    // Always initialize with the background color
+    var initialClearColor = clearColors[currentClearColor];
+    gl.clearColor(initialClearColor[0], initialClearColor[1], initialClearColor[2], initialClearColor[3]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
-    document.getElementById("clearCanvas").addEventListener("click", function() {
+    // Event Listeners (unchanged)
+    document.getElementById("clearCanvas").addEventListener("click", function () {
         var clearColorSelect = document.getElementById("clearColor");
         currentClearColor = clearColorSelect.selectedIndex;
         var clearColor = clearColors[currentClearColor];
@@ -89,8 +93,9 @@ window.onload = function () {
         triangleColors = [];
         tempPoints = [];
         trianglePoints = [];
-        firstCirclePoint = null; 
+        firstCirclePoint = null;
     });
+
 
     document.getElementById("drawPointsMode").addEventListener("click", function() {
         drawMode = 'POINTS';

@@ -58,6 +58,8 @@
         <p>
             The S (horizontal) coordinate uses <code>gl.REPEAT</code> to allow the texture to wrap around the sphere. For the T (vertical) coordinate, <code>gl.CLAMP_TO_EDGE</code> prevents stretching artifacts near the poles.
         </p>
+        <p><strong>Summary:</strong></p>
+        <p>"When spinning the Earth texture, gl.LINEAR_MIPMAP_LINEAR helps reduce aliasing caused by texture minification. Additionally, gl.LINEAR is used for magnification to preserve texture clarity during zooming. Mipmaps are generated using gl.generateMipmap to optimize texture rendering across scales. To prevent visual artifacts, the wrapping mode is set to gl.REPEAT for the horizontal (S) coordinate and gl.CLAMP_TO_EDGE for the vertical (T) coordinate. Finally, anisotropic filtering further improves texture clarity, particularly at sharp viewing angles near the poles."</p>
     </div>
     
 

@@ -123,13 +123,15 @@ window.onload = function() {
         animateLight = !animateLight;
     };
 
-    var d = -3;
+    var d = -3; 
     var Mp = mat4(
-        vec4(1,    0,    0,   0),
-        vec4(0,    1,    0,   0),
-        vec4(0,    0,    1,   0),
-        vec4(0, 1/d,    0,   1) 
+        vec4(1,    0,   0, 0),
+        vec4(0,    1,   0, 0),
+        vec4(0,    0,   1, 0),
+        vec4(0, 1/d,   0, 0)
     );
+    
+    
 
     function getLightPosition() {
         return vec3(

@@ -47,6 +47,94 @@
         </select>
     </div>
 
+      <!-- Explanation Section -->
+<div class="explanation">
+    <h2>Filtering Modes and Their Effects</h2>
+    <ul>
+        <li style="margin-bottom: 15px;">
+            <strong>1. Nearest Filtering (gl.NEAREST)</strong><br>
+            <em>Effect:</em> The nearest texel is selected without blending.<br>
+            <em>Magnification:</em> Produces a pixelated appearance when zoomed in.<br>
+            <em>Minification:</em> Creates aliasing (jagged edges) when scaled down.
+        </li>
+
+        <li style="margin-bottom: 15px;">
+            <strong>2. Linear Filtering (gl.LINEAR)</strong><br>
+            <em>Effect:</em> Linearly interpolates between neighboring texels.<br>
+            <em>Magnification:</em> Results in smooth transitions, avoiding pixelation.<br>
+            <em>Minification:</em> Reduces aliasing but still may have minor issues when scaled down.
+        </li>
+
+        <li style="margin-bottom: 15px;">
+            <strong>3. Nearest Mipmap Nearest (gl.NEAREST_MIPMAP_NEAREST)</strong><br>
+            <em>Effect:</em> Chooses the nearest mipmap level and applies nearest filtering.<br>
+            <em>Minification:</em> Reduces aliasing but appears blocky due to nearest filtering.<br>
+            <em>Magnification:</em> Mipmaps have no effect; remains pixelated.
+        </li>
+
+        <li style="margin-bottom: 15px;">
+            <strong>4. Linear Mipmap Nearest (gl.LINEAR_MIPMAP_NEAREST)</strong><br>
+            <em>Effect:</em> Chooses the nearest mipmap and applies linear filtering.<br>
+            <em>Minification:</em> Smoother compared to `gl.NEAREST_MIPMAP_NEAREST`.<br>
+            <em>Magnification:</em> No improvement; pixelation persists.
+        </li>
+
+        <li style="margin-bottom: 15px;">
+            <strong>5. Nearest Mipmap Linear (gl.NEAREST_MIPMAP_LINEAR)</strong><br>
+            <em>Effect:</em> Blends between two mipmap levels, applying nearest filtering.<br>
+            <em>Minification:</em> Smooth transitions but retains sharp edges.<br>
+            <em>Magnification:</em> Unaffected; remains pixelated.
+        </li>
+
+        <li style="margin-bottom: 15px;">
+            <strong>6. Linear Mipmap Linear (gl.LINEAR_MIPMAP_LINEAR)</strong><br>
+            <em>Effect:</em> Also known as trilinear filtering; blends between mipmaps with linear filtering.<br>
+            <em>Minification:</em> Provides the smoothest results, reducing aliasing effectively.<br>
+            <em>Magnification:</em> Produces smooth transitions without pixelation.
+        </li>
+    </ul>
+</div>
+
+        <h2>Summary Table</h2>
+        <table class="summary-table">
+            <tr>
+                <th>Filtering Mode</th>
+                <th>Magnification</th>
+                <th>Minification</th>
+            </tr>
+            <tr>
+                <td>gl.NEAREST</td>
+                <td>Pixelated</td>
+                <td>Aliasing</td>
+            </tr>
+            <tr>
+                <td>gl.LINEAR</td>
+                <td>Smooth</td>
+                <td>Slightly smoother</td>
+            </tr>
+            <tr>
+                <td>gl.NEAREST_MIPMAP_NEAREST</td>
+                <td>Pixelated</td>
+                <td>Blocky but reduced aliasing</td>
+            </tr>
+            <tr>
+                <td>gl.LINEAR_MIPMAP_NEAREST</td>
+                <td>Smooth</td>
+                <td>Smoother with less aliasing</td>
+            </tr>
+            <tr>
+                <td>gl.NEAREST_MIPMAP_LINEAR</td>
+                <td>Pixelated</td>
+                <td>Smooth transitions but sharp</td>
+            </tr>
+            <tr>
+                <td>gl.LINEAR_MIPMAP_LINEAR</td>
+                <td>Smooth</td>
+                <td>Smoothest and most seamless</td>
+            </tr>
+        </table>
+    </div>
+    
     <script src="../../../angelCommon/webgl-utils.js"></script>
     <script src="../../../angelCommon/initShaders.js"></script>
     <script src="../../../angelCommon/mv.js"></script>

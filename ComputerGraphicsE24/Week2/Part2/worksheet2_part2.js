@@ -48,7 +48,8 @@ window.onload = function () {
     ];
 
     var currentClearColor = 0;
-    var currentPointColor = 0;
+    var currentPointColor = 7;
+    document.getElementById("pointColor").selectedIndex = 7;
 
     var program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
@@ -69,6 +70,10 @@ window.onload = function () {
     var vColor = gl.getAttribLocation(program, "vColor");
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
+
+    var initialColor = clearColors[currentClearColor];
+    gl.clearColor(initialColor[0], initialColor[1], initialColor[2], initialColor[3]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
     var points = [];
     var colors = [];

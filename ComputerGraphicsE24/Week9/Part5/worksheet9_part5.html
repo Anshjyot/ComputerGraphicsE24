@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Techniques Comparison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .section {
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+            width: 45%;
+            margin: 10px;
+            padding: 15px;
+            text-align: left;
+        }
+        .section h2 {
+            color: #ffcc00;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+        .advantages, .disadvantages {
+            margin-top: 10px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        ul li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shadow Techniques Comparison</h1>
+    <div class="container">
+        <!-- Projection Shadows -->
+        <div class="section">
+            <h2>Projection Shadows</h2>
+            <p><strong>Description:</strong> Uses a projection matrix to project shadows onto flat surfaces without depth buffers or off-screen rendering.</p>
+            <div class="advantages">
+                <h3>Advantages</h3>
+                <ul>
+                    <li><strong>Simple Implementation:</strong> Easy setup with basic transformations.</li>
+                    <li><strong>Fast Performance:</strong> Fast, no additional rendering passes.</li>
+                    <li><strong>Memory Friendly:</strong> No extra storage for shadow maps.</li>
+                    <li><strong>Effective for Flat Surfaces:</strong> Works well on simple planar surfaces.</li>
+                </ul>
+            </div>
+            <div class="disadvantages">
+                <h3>Disadvantages</h3>
+                <ul>
+                    <li><strong>Limited to Flat Surfaces:</strong> Cannot handle complex surfaces.</li>
+                    <li><strong>No Self-Shadowing:</strong> Reduces realism.</li>
+                    <li><strong>Static and Can’t Change:</strong> Fixed light sources, no dynamic support.</li>
+                    <li><strong>Unrealistic Geometry:</strong> Distorted shadows on curved surfaces.</li>
+                    <li><strong>No Blocking Shadows:</strong> Objects can't block shadows correctly.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Shadow Mapping -->
+        <div class="section">
+            <h2>Shadow Mapping</h2>
+            <p><strong>Description:</strong> Renders the scene from the light source’s perspective to create a shadow map, which determines shadow visibility.</p>
+            <div class="advantages">
+                <h3>Advantages</h3>
+                <ul>
+                    <li><strong>Works on All Surfaces:</strong> Supports flat, curved, and complex surfaces.</li>
+                    <li><strong>Self-Shadowing:</strong> Objects can shadow themselves for realism.</li>
+                    <li><strong>Dynamic:</strong> Handles moving lights and objects.</li>
+                    <li><strong>Realistic Blocking:</strong> Realistic blocking of shadows.</li>
+                    <li><strong>Versatile:</strong> Supports various light types (directional, point, spot).</li>
+                </ul>
+            </div>
+            <div class="disadvantages">
+                <h3>Disadvantages</h3>
+                <ul>
+                    <li><strong>Aliasing Issues:</strong> Limited resolution causes jagged edges.</li>
+                    <li><strong>Shadow Acne:</strong> Precision errors create artifacts.</li>
+                    <li><strong>Bias Tuning:</strong> Needs careful depth bias adjustments.</li>
+                    <li><strong>Performance Overhead:</strong> Requires rendering the scene twice.</li>
+                    <li><strong>Complex Implementation:</strong> Requires depth buffers and shader logic.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

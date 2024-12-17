@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worksheet 9 - Shadow Mapping</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        canvas {
+            margin-top: 20px;
+            border: 1px solid #ffffff;
+        }
+        button {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jumping Teapot with Shadow Mapping</h1>
+    <button id="toggleLight">Toggle Light Circulation</button>
+    <button id="toggleMotion">Toggle Teapot Motion</button>
+    <canvas id="glCanvas" width="512" height="512"></canvas>
+
+    <script src="../../../angelCommon/webgl-utils.js"></script>
+    <script src="../../../angelCommon/initShaders.js"></script>
+    <script src="../../../angelCommon/mv.js"></script>
+    <script src="../../../assets/OBJParser.js"></script>
+    <script src="worksheet9_part3And4.js"></script>
+
+    <!-- Shadow Map Shaders -->
+    <script id="shadow-vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 aPosition;
+        uniform mat4 uMvpMatrix;
+        void main() {
+            gl_Position = uMvpMatrix * aPosition;
+        }
+    </script>
+
+    <script id="shadow-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        void main() {
+            // Store the fragment depth in the red channel
+            gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
+        }
+    </script>
+
+    <!-- Ground Shaders -->
+    <script id="ground-vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec2 vTexCoord;
+        varying vec2 fTexCoord;
+        uniform mat4 uModelViewMatrix, uProjectionMatrix;
+        uniform mat4 uMvpMatrixFromLight;
+        varying vec4 vPositionFromLight;
+        void main() {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vPosition;
+            fTexCoord = vTexCoord;
+            vPositionFromLight = uMvpMatrixFromLight * vPosition;
+        }
+    </script>
+
+    <script id="ground-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec2 fTexCoord;
+        varying vec4 vPositionFromLight;
+        uniform sampler2D uTexture;
+        uniform sampler2D uShadowMap;
+        uniform vec3 uLightPosition;
+
+        void main() {
+            // Base color from texture
+            vec4 baseColor = texture2D(uTexture, fTexCoord);
+
+            // Compute shadowCoord
+            vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w)*0.5 + 0.5;
+            float depthFromMap = texture2D(uShadowMap, shadowCoord.xy).r;
+            float depthFromLight = shadowCoord.z;
+
+            float bias = 0.005;
+            float visibility = (depthFromLight > depthFromMap + bias) ? 0.5 : 1.0;
+
+            gl_FragColor = vec4(baseColor.rgb * visibility, baseColor.a);
+        }
+    </script>
+
+    <!-- Teapot Shaders -->
+    <script id="teapot-vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec3 vNormal;
+        varying vec3 fNormal, fPosition;
+        uniform mat4 uModelViewMatrix, uProjectionMatrix;
+        uniform mat4 uMvpMatrixFromLight;
+        varying vec4 vPositionFromLight;
+
+        void main() {
+            vec4 pos = uModelViewMatrix * vPosition;
+            fPosition = vec3(pos);
+            fNormal = normalize(mat3(uModelViewMatrix) * vNormal);
+            gl_Position = uProjectionMatrix * pos;
+            vPositionFromLight = uMvpMatrixFromLight * vPosition;
+        }
+    </script>
+
+    <script id="teapot-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec3 fNormal, fPosition;
+        varying vec4 vPositionFromLight;
+        uniform vec3 uLightPosition;
+        uniform sampler2D uShadowMap;
+
+        void main() {
+            vec3 normal = normalize(fNormal);
+            vec3 lightDir = normalize(uLightPosition - fPosition);
+            float diffuse = max(dot(normal, lightDir), 0.0);
+
+            // Compute shadow
+            vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w)*0.5 + 0.5;
+            float depthFromMap = texture2D(uShadowMap, shadowCoord.xy).r;
+            float depthFromLight = shadowCoord.z;
+            float bias = 0.005;
+            float visibility = (depthFromLight > depthFromMap + bias) ? 0.5 : 1.0;
+
+            gl_FragColor = vec4(vec3(diffuse) * visibility, 1.0);
+        }
+    </script>
+</body>
+</html>
