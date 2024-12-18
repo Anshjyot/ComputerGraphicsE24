@@ -146,25 +146,31 @@
             partList.className = 'part-list';
 
             data.parts.forEach(part => {
-                const partItem = document.createElement('li');
-                const link = document.createElement('a');
-                const weekNumber = key.replace(/\D/g, ''); 
+    const partItem = document.createElement('li');
+    const link = document.createElement('a');
+    const weekNumber = key.replace(/\D/g, ''); 
 
-                let fileName;
-                if (key === 'Project') {
-                    fileName = `planar_reflection_${part.toLowerCase()}.html`;
-                } else if (part === 'AllParts' || part.includes('And')) {
-                    fileName = `${key.toLowerCase()}_${part.toLowerCase()}.html`;
-                } else {
-                    fileName = `worksheet${weekNumber}_${part.toLowerCase()}.html`;
-                }
+    let fileName;
+    if (key === 'Project') {
+        fileName = `planar_reflection_${part.toLowerCase()}.html`;
+    } else if (key === 'Week5' && part === 'AllParts') { 
+    
+        fileName = `worksheet${weekNumber}_AllParts.html`;
+        link.href = `${basePath}/${key}/${fileName}`;
+    } else if (part.includes('And')) {
+        fileName = `${key.toLowerCase()}_${part.toLowerCase()}.html`;
+        link.href = `${basePath}/${key}/${part}/${fileName}`;
+    } else {
+        fileName = `worksheet${weekNumber}_${part.toLowerCase()}.html`;
+        link.href = `${basePath}/${key}/${part}/${fileName}`;
+    }
 
-                link.href = `${basePath}/${key}/${part}/${fileName}`;
-                link.textContent = part;
-                link.target = '_blank';
-                partItem.appendChild(link);
-                partList.appendChild(partItem);
-            });
+    link.textContent = part;
+    link.target = '_blank';
+    partItem.appendChild(link);
+    partList.appendChild(partItem);
+});
+
 
             weekDiv.appendChild(weekHeader);
             weekDiv.appendChild(partList);
