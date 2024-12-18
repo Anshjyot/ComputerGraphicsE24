@@ -9,7 +9,7 @@ window.onload = function () {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.DEPTH_TEST);
 
-    // Load programs
+
     const shadowProgram = initShaders(gl, "shadow-vertex-shader", "shadow-fragment-shader");
     const groundProgram = initShaders(gl, "ground-vertex-shader", "ground-fragment-shader");
     const teapotProgram = initShaders(gl, "teapot-vertex-shader", "teapot-fragment-shader");
@@ -28,7 +28,6 @@ window.onload = function () {
     document.getElementById("toggleLight").onclick = () => orbitLight = !orbitLight;
     document.getElementById("toggleMotion").onclick = () => moveTeapot = !moveTeapot;
 
-    // Framebuffer for shadow map
     const SHADOW_SIZE = 1024;
     const fbo = createFramebufferObject(gl, SHADOW_SIZE, SHADOW_SIZE);
 
@@ -64,27 +63,27 @@ window.onload = function () {
 
         const lightPos = vec3(3 * Math.sin(lightAngle), 2.0, 3 * Math.cos(lightAngle));
 
-        // Light view/projection
+   
         const lightProjMatrix = perspective(90, 1.0, 0.1, 100.0);
         const lightViewMatrix = lookAt(lightPos, vec3(0,0,0), vec3(0,1,0));
         const lightVP = mult(lightProjMatrix, lightViewMatrix);
 
-        // First Pass: Render to FBO from light's POV
+     
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.fbo);
         gl.viewport(0,0,fbo.width,fbo.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(shadowProgram);
         const uMvpMatrixShadow = gl.getUniformLocation(shadowProgram, "uMvpMatrix");
-        // Draw ground for shadow
+   
         {
-            // ground model
+           
             const groundMV = translate(0, -1, -3);
             const groundMVPFromLight = mult(lightVP, groundMV);
             gl.uniformMatrix4fv(uMvpMatrixShadow, false, flatten(groundMVPFromLight));
             drawQuadShadowPass();
         }
 
-        // Draw teapot for shadow
+      
         {
             const teapotMV = mult(translate(0, teapotYOffset - 1, -3), scalem(0.25,0.25,0.25));
             const teapotMVPFromLight = mult(lightVP, teapotMV);
@@ -92,7 +91,7 @@ window.onload = function () {
             drawModelShadowPass(teapotModel);
         }
 
-        // Second Pass: Render to screen from camera POV
+        
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0,0,canvas.width,canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -100,7 +99,7 @@ window.onload = function () {
         const cameraView = lookAt(vec3(0,5,10), vec3(0,0,0), vec3(0,1,0));
         const cameraVP = mult(projMatrix, cameraView);
 
-        // Draw ground with normal program
+    
         gl.useProgram(groundProgram);
         const uModelViewMatrix_g = gl.getUniformLocation(groundProgram, "uModelViewMatrix");
         const uProjectionMatrix_g = gl.getUniformLocation(groundProgram, "uProjectionMatrix");
@@ -109,7 +108,7 @@ window.onload = function () {
         const uShadowMap_g = gl.getUniformLocation(groundProgram, "uShadowMap");
         const uLightPos_g = gl.getUniformLocation(groundProgram, "uLightPosition");
 
-        // Setup ground uniforms
+      
         const groundMV = translate(0,-1,-3);
         const groundMVP = mult(cameraVP, groundMV);
         gl.uniformMatrix4fv(uModelViewMatrix_g, false, flatten(groundMV));
@@ -127,7 +126,7 @@ window.onload = function () {
 
         drawQuad(gl);
 
-        // Draw teapot with normal program
+     
         gl.useProgram(teapotProgram);
         const uModelViewMatrix_t = gl.getUniformLocation(teapotProgram,"uModelViewMatrix");
         const uProjectionMatrix_t = gl.getUniformLocation(teapotProgram,"uProjectionMatrix");
@@ -151,7 +150,7 @@ window.onload = function () {
     }
 
     function drawQuadShadowPass() {
-        // Just position attribute for shadow pass
+       
         const vertices = new Float32Array([
             -2, -1, -2,
              2, -1, -2,

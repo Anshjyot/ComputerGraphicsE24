@@ -1,15 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Part 02: Planar Reflector: Reflector</title>
+    <title>Project Planar Reflection - Part 2</title>
+    <h1>Project Planar Reflection - Part 2</h1>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            border: 2px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3700b3;
+        }
+
+        button:active {
+            background-color: #03dac6;
+        }
+    </style>
     <script src="../../../angelCommon/webgl-utils.js"></script>
     <script src="../../../angelCommon/initShaders.js"></script>
     <script src="../../../angelCommon/mv.js"></script>
     <script src="../../../assets/OBJParser.js"></script>
-    <script src="planar_reflection_part2.js"></script>   
+    <script src="planar_reflection_part2.js"></script>
 </head>
 
+
 <body onload="main()">
+    <canvas id="canvas" width="580" height="580"></canvas>
+    <div class="button-container">
+        <button id="button-ToggleTeapot">Toggle Movement</button>
+        <button id="button-ToggleLight">Toggle Light</button>
+    </div>
     <script id="vertex-shader" type="x-shader/x-vertex">
         precision mediump float;
         
@@ -82,11 +130,10 @@
             vec3 e = normalize(v_eye_camera);
             vec3 r = normalize(2.0 * dot(l, n) * n - l);
         
-            // Pearl material
-            vec3 ka = vec3(0.25, 0.20725, 0.20725);
-            vec3 ks = vec3(0.296648, 0.296648, 0.296648);
-            vec3 kd = vec3(1, 0.829, 0.829);
-            float shininess = 11.264;
+            vec3 ka = vec3(0.1, 0.3, 0.3); 
+            vec3 ks = vec3(0.5, 0.9, 0.9); 
+            vec3 kd = vec3(0.1, 0.8, 0.8); 
+            float shininess = 32.0;        
             
             vec3 ambient = ka;
             
@@ -130,12 +177,5 @@
         }                                               
     </script>
 
-    <canvas id="canvas" width="580" height="580">
-        HTML5 Canvas is not supported.
-    </canvas>
-
-    <br>
-    <button id="button-teapot">Move</button>
-    <button id="button-light">Light</button>
 </body>
 </html>

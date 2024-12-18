@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Computer Graphics Projects</title>
+    <title>02561 COMPUTER GRAPHICS</title>
     <style>
-        /* Global Styles */
+    
         body {
             font-family: Arial, sans-serif;
             background-color: #1e1e2f;
@@ -73,7 +73,7 @@
             transition: max-height 0.3s ease;
         }
         .part-list.open {
-            max-height: 1000px; /* Large enough to fit all parts */
+            max-height: 1000px; 
         }
         .part-list li {
             margin: 10px 0;
@@ -98,15 +98,15 @@
     </style>
 </head>
 <body>
-    <h1>Computer Graphics Projects</h1>
+    <h1>02561 COMPUTER GRAPHICS</h1>
     <div class="container" id="projectList"></div>
     <footer>Copyright © 2024 - Anshjyot Singh (s215806)</footer>
 
     <script>
-        // Define the structure of weeks and parts
+      
         const projects = {
             Project: {
-                title: "Project - Planar Reflector", // Custom title for the project
+                title: "Project - Planar Reflector",
                 parts: ['Part1', 'Part2', 'Part3', 'Part4']
             },
             Week1: { title: "Week 1", parts: ['Part1', 'Part2', 'Part3', 'Part4', 'Part5'] },
@@ -121,11 +121,11 @@
             Week10: { title: "Week 10", parts: ['Part1', 'Part2', 'Part3', 'Part4'] },
         };
 
-        const basePath = 'ComputerGraphicsE24'; // Base path to your project files
+        const basePath = 'ComputerGraphicsE24'; 
 
         const projectList = document.getElementById('projectList');
 
-        // Create each week section
+      
         for (const [key, data] of Object.entries(projects)) {
             const weekDiv = document.createElement('div');
             weekDiv.className = 'week';
@@ -145,11 +145,10 @@
             const partList = document.createElement('ul');
             partList.className = 'part-list';
 
-            // Add parts for the week
             data.parts.forEach(part => {
                 const partItem = document.createElement('li');
                 const link = document.createElement('a');
-                const weekNumber = key.replace(/\D/g, ''); // Extract week number
+                const weekNumber = key.replace(/\D/g, ''); 
 
                 let fileName;
                 if (key === 'Project') {
@@ -171,21 +170,21 @@
             weekDiv.appendChild(partList);
             projectList.appendChild(weekDiv);
 
-            // Toggle functionality for expanding and collapsing parts
+           
             const toggleParts = () => {
                 const isOpen = partList.classList.toggle('open');
                 toggleButton.textContent = isOpen ? '-' : '+';
             };
 
-            // Allow clicking the header or the entire week div to toggle
+           
             weekDiv.addEventListener('click', (event) => {
-                if (!event.target.closest('a')) { // Ignore clicks on links
+                if (!event.target.closest('a')) { 
                     toggleParts();
                 }
             });
 
             toggleButton.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevent double-toggling when clicking the button
+                event.stopPropagation(); 
                 toggleParts();
             });
         }

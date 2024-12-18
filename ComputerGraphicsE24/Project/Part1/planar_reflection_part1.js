@@ -3,19 +3,19 @@ let normals = [];
 let textureCoords = [];
 
 async function initializeVariables() {    
-    at = vec3(0, 0, -3);
-    eye = vec3(0, 0, 1);
-    up = vec3(0, 1, 0);
-
     fovy = 65;
     aspect = canvas.width / canvas.height;
     near = 0.1;
     far = 30;
 
+    at = vec3(0, 0, -3);
+    eye = vec3(0, 0, 1);
+    up = vec3(0, 1, 0);
+
     light = vec3(0.0, 2.0, -2.0);
 
-    ground = {};
-    ground.positions = [
+    plane = {};
+    plane.positions = [
         vec3(-2, -1, -1),
         vec3(2, -1, -1),
         vec3(2, -1, -5),
@@ -23,7 +23,7 @@ async function initializeVariables() {
         vec3(2, -1, -5),
         vec3(-2, -1, -5)
     ];
-    ground.textureCoords = [
+    plane.textureCoords = [
         vec2(0, 0),
         vec2(1, 0),
         vec2(1, 1),
@@ -31,7 +31,7 @@ async function initializeVariables() {
         vec2(1, 1),
         vec2(0, 1)
     ];
-    ground.normals = [
+    plane.normals = [
         vec3(0, 1, 0),
         vec3(0, 1, 0),
         vec3(0, 1, 0),
@@ -44,30 +44,27 @@ async function initializeVariables() {
     depthViewMatrix = lookAt(light, at, up);
     projectionMatrix = perspective(fovy, aspect, near, far);
 
-    // Load and parse `.obj` files asynchronously
+   
     const teapot = await readOBJFile('../../../assets/teapot/teapot.obj', 0.3, false);
-
     if (!teapot) {
         console.error("Failed to load teapot OBJ file.");
         return;
     }
 
-    // Combine ground and teapot data into positions and normals
-    positions = [].concat(ground.positions);
-    normals = [].concat(ground.normals);
-    textureCoords = [].concat(ground.textureCoords);
+    positions = [].concat(plane.positions);
+    normals = [].concat(plane.normals);
+    textureCoords = [].concat(plane.textureCoords);
 
-    // Process teapot.vertices and teapot.normals
     for (let i = 0; i < teapot.indices.length; i++) {
         const idx = teapot.indices[i];
         positions.push(vec3(teapot.vertices[idx * 4], teapot.vertices[idx * 4 + 1], teapot.vertices[idx * 4 + 2]));
         normals.push(vec3(teapot.normals[idx * 4], teapot.normals[idx * 4 + 1], teapot.normals[idx * 4 + 2]));
-        textureCoords.push(vec2(0, 0)); // Placeholder texture coordinates
+        textureCoords.push(vec2(0, 0)); 
     }
 }
 
 
-// Viewport setup
+
 function initViewport() {
     gl.clearColor(0,0,0,1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -78,7 +75,7 @@ function initViewport() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
-// Do reverse-transformation to a matrix
+
 function createRMatrix(v, p) {
     return mat4(
         1-2*v[0]*v[0],  -2*v[0]*v[1],   -2*v[0]*v[2],   2*(dot(p, v))*v[0] ,
@@ -88,7 +85,7 @@ function createRMatrix(v, p) {
     );
 }
 
-// Multiply matrix
+
 function matrixVectorMult(A, x) {
     var Ax = [];
     for (var i = 0; i < x.length; i++) {
@@ -98,21 +95,20 @@ function matrixVectorMult(A, x) {
         }
         Ax.push(sum);
     }
-    // AND MY
+   
     return Ax;
 }
 
 async function main() {  
-    const canvas = document.getElementById("canvas"); // Ensure the ID matches your HTML
+    const canvas = document.getElementById("canvas");
     const gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) {
         alert("WebGL isn't supported");
         return;
     }
 
-    window.gl = gl; // Optional: Only if other parts of your code expect a global 'gl'
+    window.gl = gl; 
 
-    // Set clear color and enable depth testing
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
@@ -120,14 +116,14 @@ async function main() {
     await initializeVariables();
 
     program = initShaders(gl, "vertex-shader", "fragment-shader");
-    lightProgram = initShaders(gl, "lighting-vertex-shader", "lightning-fragment-shader");
+    lightProgram = initShaders(gl, "light-vertex-shader", "light-fragment-shader");
     depthProgram = initShaders(gl, "depth-vertex-shader", "depth-fragment-shader");
     initViewport();
 
     depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture") || gl.getExtension("WEBGL_depth_texture");
     size = Math.pow(2,9);
 
-    // Create a color texture
+   
     colorTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, colorTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -136,7 +132,7 @@ async function main() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
-    // Create the depth texture
+ 
     gl.activeTexture(gl.TEXTURE3);
     depthTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, depthTexture);
@@ -155,7 +151,7 @@ async function main() {
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    // Setup shader and buffer data
+
     gl.useProgram(program);
     programModel = {
         a_position: {
@@ -220,21 +216,21 @@ async function main() {
     gl.useProgram(program);
     gl.uniformMatrix4fv(programModel.u_projection, false, flatten(projectionMatrix));
 
-    p = ground.positions[0];
+    p = plane.positions[0];
     v = normalize(
-        cross(subtract(ground.positions[1], ground.positions[0]),
-        subtract(ground.positions[2], ground.positions[0]))
+        cross(subtract(plane.positions[1], plane.positions[0]),
+        subtract(plane.positions[2], plane.positions[0]))
     );
     R = createRMatrix(v, p);
 
     phi = 0;
     theta = 0;
 
-    // Button setup
+
     moveTeapot = true;
     moveLight = true;
-    document.getElementById("button-teapot").onclick = () => { moveTeapot = !moveTeapot };
-    document.getElementById("button-light").onclick = () => { moveLight = !moveLight };
+    document.getElementById("button-ToggleTeapot").onclick = () => { moveTeapot = !moveTeapot };
+    document.getElementById("button-ToggleLight").onclick = () => { moveLight = !moveLight };
 
     render();
 
@@ -288,7 +284,6 @@ async function main() {
         var teapotModelMatrix = translate(0, - 0.75 - 0.25 * Math.sin(phi), -3);
         var teapotModelViewMatrix = mult(viewMatrix, teapotModelMatrix);
 
-        // Render to the framebuffer for shadow mapping
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
         gl.viewport(0, 0, size, size);
         gl.colorMask(false, false, false, false);
@@ -296,7 +291,6 @@ async function main() {
 
         drawTeapot(teapotModelMatrix);
 
-        // Render to the screen
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.colorMask(true, true, true, true);

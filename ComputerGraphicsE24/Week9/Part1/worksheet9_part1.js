@@ -30,10 +30,10 @@ window.onload = function () {
 
         const lightPos = [3 * Math.sin(lightAngle), 2, 3 * Math.cos(lightAngle)];
 
-        // Ground
+
         drawGround();
 
-        // Teapot
+ 
         drawTeapot(lightPos);
 
         requestAnimationFrame(render);
@@ -100,20 +100,20 @@ window.onload = function () {
 
     
     function setMatrices(gl, program, modelViewMatrix, projectionMatrix) {
-        // Get uniform locations
+   
         const mvMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
         const projMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
     
-        // Set uniform values
+    
         gl.uniformMatrix4fv(mvMatrixLoc, false, flatten(modelViewMatrix));
         gl.uniformMatrix4fv(projMatrixLoc, false, flatten(projectionMatrix));
     }
 
     function setTexture(gl, program, texture) {
-        gl.activeTexture(gl.TEXTURE0); // Activate texture unit 0
-        gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the texture
+        gl.activeTexture(gl.TEXTURE0); 
+        gl.bindTexture(gl.TEXTURE_2D, texture); 
         const uTextureLoc = gl.getUniformLocation(program, "uTexture");
-        gl.uniform1i(uTextureLoc, 0); // Set the texture sampler to use TEXTURE0
+        gl.uniform1i(uTextureLoc, 0); 
     }
     
     function drawGround() {
@@ -141,8 +141,8 @@ window.onload = function () {
             gl.bindTexture(gl.TEXTURE_2D, null);
         };
     
-        image.src = url; // Load the texture image
-        return texture;  // Return the texture object
+        image.src = url; 
+        return texture;
     }
 
     

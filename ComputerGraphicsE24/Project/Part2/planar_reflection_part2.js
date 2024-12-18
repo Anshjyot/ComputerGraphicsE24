@@ -1,4 +1,3 @@
-// Load ground texture image
 groundTexture = document.createElement('img');
 groundTexture.src = '../../../assets/xamp23.png';
 let positions = [];
@@ -6,7 +5,7 @@ let normals = [];
 let textureCoords = [];
 
 async function initializeVariables() {
-    // Camera setup
+   
     at = vec3(0, 0, -3);
     eye = vec3(0, 0, 1);
     up = vec3(0, 1, 0);
@@ -18,7 +17,7 @@ async function initializeVariables() {
 
     light = vec3(0.0, 2.0, -2.0);
 
-    // Ground data
+  
     ground = {};
     ground.positions = [
         vec3(-2, -1, -1),
@@ -45,7 +44,7 @@ async function initializeVariables() {
         vec3(0, 1, 0)
     ];
 
-    // Matrices
+
     viewMatrix = lookAt(eye, at, up);
     depthViewMatrix = lookAt(light, at, up);
     projectionMatrix = perspective(fovy, aspect, near, far);
@@ -54,12 +53,10 @@ async function initializeVariables() {
     shadowProjectionMatrix[3][3] = 0;
     shadowProjectionMatrix[3][1] = -1 / light[1];
 
-    // Initialize positions, normals, and textureCoords with ground data
     positions = [].concat(ground.positions);
     textureCoords = [].concat(ground.textureCoords);
     normals = [].concat(ground.normals);
 
-    // Load and parse the OBJ file asynchronously
     console.log("Loading teapot OBJ file...");
     const teapot = await readOBJFile('../../../assets/teapot/teapot.obj', 0.3, false);
 
@@ -70,7 +67,7 @@ async function initializeVariables() {
 
     console.log("Teapot loaded successfully:", teapot);
 
-    // Append teapot vertex data
+   
     for (let i = 0; i < teapot.indices.length; i++) {
         const idx = teapot.indices[i];
 
@@ -86,12 +83,12 @@ async function initializeVariables() {
             teapot.normals[idx * 4 + 2]
         ));
 
-        // Placeholder texture coordinates
+      
         textureCoords.push(vec2(0, 0));
     }
 }
 
-// Viewport setup
+
 function initViewport() {
     gl.clearColor(0,0,0,1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -102,7 +99,6 @@ function initViewport() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
-// Do reverse-transformation to a matrix
 function createRMatrix(v, p) {
     return mat4(
         1-2*v[0]*v[0],  -2*v[0]*v[1],   -2*v[0]*v[2],   2*(dot(p, v))*v[0] ,
@@ -112,7 +108,7 @@ function createRMatrix(v, p) {
     );
 }
 
-// Multiply matrix
+
 function matrixVectorMult(A, x) {
     var Ax = [];
     for (var i = 0; i < x.length; i++) {
@@ -122,7 +118,7 @@ function matrixVectorMult(A, x) {
         }
         Ax.push(sum);
     }
-    // AND MY
+ 
     return Ax;
 }
 
@@ -133,7 +129,7 @@ async function main() {
         alert("WebGL isn't supported");
         return;
     }
-    window.gl = gl; // Optional global reference for other functions
+    window.gl = gl; 
 
     await  initializeVariables();
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
@@ -145,7 +141,7 @@ async function main() {
     depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture") || gl.getExtension("WEBGL_depth_texture");
     size = Math.pow(2,9);
 
-    // Create a color texture
+   
     colorTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, colorTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -154,7 +150,7 @@ async function main() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
-    // Create the depth texture
+    
     gl.activeTexture(gl.TEXTURE3);
     depthTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, depthTexture);
@@ -173,7 +169,6 @@ async function main() {
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    // Setup shader and buffer data
     gl.useProgram(program);
     programModel = {
         a_position: {
@@ -245,17 +240,18 @@ async function main() {
         cross(subtract(ground.positions[1], ground.positions[0]),
         subtract(ground.positions[2], ground.positions[0]))
     );
-    // R matrix
+
     R = createRMatrix(v, p);
 
     phi = 0;
     theta = 0;
 
-    // Button setup
+
     moveTeapot = true;
     moveLight = true;
-    document.getElementById("button-teapot").onclick = () => { moveTeapot = !moveTeapot };
-    document.getElementById("button-light").onclick = () => { moveLight = !moveLight };
+    document.getElementById("button-ToggleTeapot").onclick = () => { moveTeapot = !moveTeapot };
+    document.getElementById("button-ToggleLight").onclick = () => { moveLight = !moveLight };
+
 
     render();
 

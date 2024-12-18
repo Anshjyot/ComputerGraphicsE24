@@ -49,7 +49,7 @@ window.onload = function () {
         [1.0, 1.0, 1.0, 1.0]
     ];
 
-    var currentClearColor = 0; // Default clear color index
+    var currentClearColor = 0; 
     var currentPointColor = 7;
     var drawMode = 'POINTS';
     var firstCirclePoint = null;
@@ -75,12 +75,11 @@ window.onload = function () {
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
 
-    // Always initialize with the background color
+
     var initialClearColor = clearColors[currentClearColor];
     gl.clearColor(initialClearColor[0], initialClearColor[1], initialClearColor[2], initialClearColor[3]);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Event Listeners (unchanged)
     document.getElementById("clearCanvas").addEventListener("click", function () {
         var clearColorSelect = document.getElementById("clearColor");
         currentClearColor = clearColorSelect.selectedIndex;

@@ -6,21 +6,19 @@ window.onload = function () {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.DEPTH_TEST);
 
-    // Initialize shaders
+    
     const groundProgram = initShaders(gl, "ground-vertex-shader", "ground-fragment-shader");
     const teapotProgram = initShaders(gl, "teapot-vertex-shader", "teapot-fragment-shader");
 
-    // Projection matrix
-    //const projMatrix = perspective(45, canvas.width / canvas.height, 0.1, 100.0);
+   
     const projMatrix = perspective(60, canvas.width / canvas.height, 0.1, 100.0);
-    // Load ground texture
+
     const groundTexture = loadTexture(gl, "../../../assets/xamp23.png");
 
-    // Variables
+
     let teapotModel;
     let lightAngle = 0, moveTeapot = true, orbitLight = true, teapotYOffset = 0;
 
-    // Buttons
     document.getElementById("toggleLight").onclick = () => orbitLight = !orbitLight;
     document.getElementById("toggleMotion").onclick = () => moveTeapot = !moveTeapot;
 
@@ -29,30 +27,17 @@ window.onload = function () {
         requestAnimationFrame(render);
     });
 
-    // Get uniform locations for teapot program
     const uIsShadowLoc = gl.getUniformLocation(teapotProgram, "uIsShadow");
     const uLightPositionLoc = gl.getUniformLocation(teapotProgram, "uLightPosition");
 
     function render() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
-        // Update light position (orbiting light)
         lightAngle += orbitLight ? 0.01 : 0;
         const lightPos = vec3(3 * Math.sin(lightAngle), 2.0, 3 * Math.cos(lightAngle));
-    
-        // Update teapot's vertical position
         teapotYOffset = moveTeapot ? 0.5 * Math.sin(performance.now() / 500) : 0;
-    
-        // Draw the ground
         drawGround();
-    
-        // Draw the shadow
         drawTeapotShadow(lightPos);
-    
-        // Draw the teapot
         drawTeapot(lightPos);
-    
-        // Request the next frame
         requestAnimationFrame(render);
     }
     
@@ -66,11 +51,11 @@ window.onload = function () {
 
     function drawTeapot(lightPos) {
         gl.useProgram(teapotProgram);
-        // Normal pass
+       
         gl.uniform1i(uIsShadowLoc, 0);
 
         const mvMatrix = mult(translate(0, teapotYOffset - 1, -3), scalem(0.25, 0.25, 0.25));
-        // const mvMatrix = mult(translate(0, teapotYOffset + 0.5, -5), scalem(0.25, 0.25, 0.25));
+      
         setMatrices(gl, teapotProgram, mvMatrix, projMatrix);
         gl.uniform3fv(uLightPositionLoc, flatten(lightPos));
         drawModel(gl, teapotModel);
@@ -79,11 +64,11 @@ window.onload = function () {
     function drawTeapotShadow(lightPos) {
         gl.useProgram(teapotProgram);
     
-        // Set the shadow flag
-        gl.uniform1i(uIsShadowLoc, 1); // Shadow pass
+       
+        gl.uniform1i(uIsShadowLoc, 1); 
     
-        // Calculate shadow projection matrix for y = -1 plane
-        const d = lightPos[1] + 1.0; // Light height above the plane
+     
+        const d = lightPos[1] + 1.0; 
         const Mp = mat4(
             vec4(1, 0, 0, 0),
             vec4(0, 0, 0, 0),
@@ -91,37 +76,36 @@ window.onload = function () {
             vec4(0, 1 / d, 0, 1)
         );
     
-        // Shadow matrix: light position + teapot transformation
+       
         const Tneg = translate(-lightPos[0], -lightPos[1], -lightPos[2]);
         const Tpos = translate(lightPos[0], lightPos[1], lightPos[2]);
         const shadowMatrix = mult(Tpos, mult(Mp, Tneg));
     
-        // Teapot's transformation matrix
+       
         const teapotModelMatrix = mult(
             translate(0, teapotYOffset - 1, -3),
             scalem(0.25, 0.25, 0.25)
         );
     
-        // Combine shadow matrix with teapot's model matrix
+
         const mvMatrix = mult(translate(0, teapotYOffset + 0.5, -3), scalem(0.25, 0.25, 0.25));
 
     
-        // Set shader uniforms
+      
         setMatrices(gl, teapotProgram, mvMatrix, projMatrix);
     
-        // Depth trick: Shadows are rendered slightly above the ground
+        
         gl.depthFunc(gl.GREATER);
         gl.enable(gl.POLYGON_OFFSET_FILL);
         gl.polygonOffset(1.0, 1.0);
     
-        // Draw the shadow
+  
         drawModel(gl, teapotModel);
     
-        // Reset depth function and polygon offset
         gl.disable(gl.POLYGON_OFFSET_FILL);
         gl.depthFunc(gl.LESS);
     
-        // Reset shadow flag for normal teapot rendering
+    
         gl.uniform1i(uIsShadowLoc, 0);
     }
     
@@ -146,12 +130,7 @@ window.onload = function () {
              5, -1, -10,
             -5, -1, -10
         ]);
-        // const vertices = new Float32Array([
-        //     -2, -1, -2,
-        //      2, -1, -2,
-        //      2, -1, -6,
-        //     -2, -1, -6
-        // ]);
+
         
         const texCoords = new Float32Array([
             0.0, 0.0,

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Worksheet 9 - Shadow Mapping</title>
+    <title>Worksheet 9 - Part 3&4: Shadow Mapping</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
     </style>
 </head>
 <body>
-    <h1>Jumping Teapot with Shadow Mapping</h1>
+    <h1>Worksheet 9 - Part 3&4: Jumping Teapot with Shadow Mapping</h1>
     <button id="toggleLight">Toggle Light Circulation</button>
     <button id="toggleMotion">Toggle Teapot Motion</button>
     <canvas id="glCanvas" width="512" height="512"></canvas>
@@ -32,7 +32,6 @@
     <script src="../../../assets/OBJParser.js"></script>
     <script src="worksheet9_part3&4.js"></script>
 
-    <!-- Shadow Map Shaders -->
     <script id="shadow-vertex-shader" type="x-shader/x-vertex">
         attribute vec4 aPosition;
         uniform mat4 uMvpMatrix;
@@ -44,12 +43,12 @@
     <script id="shadow-fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
         void main() {
-            // Store the fragment depth in the red channel
+          
             gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
         }
     </script>
 
-    <!-- Ground Shaders -->
+   
     <script id="ground-vertex-shader" type="x-shader/x-vertex">
         attribute vec4 vPosition;
         attribute vec2 vTexCoord;
@@ -73,10 +72,10 @@
         uniform vec3 uLightPosition;
 
         void main() {
-            // Base color from texture
+      
             vec4 baseColor = texture2D(uTexture, fTexCoord);
 
-            // Compute shadowCoord
+      
             vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w)*0.5 + 0.5;
             float depthFromMap = texture2D(uShadowMap, shadowCoord.xy).r;
             float depthFromLight = shadowCoord.z;
@@ -88,7 +87,7 @@
         }
     </script>
 
-    <!-- Teapot Shaders -->
+
     <script id="teapot-vertex-shader" type="x-shader/x-vertex">
         attribute vec4 vPosition;
         attribute vec3 vNormal;
@@ -118,7 +117,7 @@
             vec3 lightDir = normalize(uLightPosition - fPosition);
             float diffuse = max(dot(normal, lightDir), 0.0);
 
-            // Compute shadow
+         
             vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w)*0.5 + 0.5;
             float depthFromMap = texture2D(uShadowMap, shadowCoord.xy).r;
             float depthFromLight = shadowCoord.z;

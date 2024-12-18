@@ -23,16 +23,16 @@
         uniform vec4 uKd;
 
         void main() {
-            // Transform normal into eye coordinates
+          
             vec3 transformedNormal = normalize((uModelViewMatrix * vec4(vNormal, 0.0)).xyz);
 
-            // Compute the diffuse light intensity
+        
             float diffuse = max(dot(transformedNormal, uLightDirection), 0.0);
 
-            // Compute the final color using diffuse reflection
+       
             fColor = uKd * uLightDiffuse * diffuse;
 
-            // Calculate the vertex position in clip space
+         
             gl_Position = uProjectionMatrix * uModelViewMatrix * vPosition;
         }
     </script>
