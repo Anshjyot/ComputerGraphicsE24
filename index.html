@@ -3,13 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComputerGraphicsE24</title>
+    <title>Computer Graphics Projects</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e2f;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #ff8c00;
+            margin-top: 30px;
+            text-transform: uppercase;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .week {
+            margin-bottom: 20px;
+            background: #2a2a3d;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background 0.3s ease;
+            cursor: pointer;
+        }
+        .week:hover {
+            transform: scale(1.02);
+            background: #343455;
+        }
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .week-header h2 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .week-header .toggle {
+            font-size: 1.2em;
+            background: #ff8c00;
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .week-header .toggle:focus {
+            outline: none;
+        }
+        .part-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .part-list.open {
+            max-height: 1000px; /* Large enough to fit all parts */
+        }
+        .part-list li {
+            margin: 10px 0;
+            padding-left: 15px;
+        }
+        .part-list li a {
+            text-decoration: none;
+            color: #ff8c00;
+            font-size: 1.1em;
+            display: inline-block;
+            transition: color 0.3s ease;
+        }
+        .part-list li a:hover {
+            color: #ffd700;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="glCanvas" width="512" height="512"></canvas>
+    <h1>Computer Graphics Projects</h1>
+    <div class="container" id="projectList"></div>
+    <footer>Copyright © 2024 - Anshjyot Singh (s215806)</footer>
 
-    <script src="angelCommon/webgl-utils.js"></script>  
-    <script src="angelCommon/initShaders.js"></script>  
-    <script src="ComputerGraphicsE24/Week1/Part1/worksheet1_part1.js"></script>
+    <script>
+        // Define the structure of weeks and parts
+        const projects = {
+            Project: {
+                title: "Project - Planar Reflector", // Custom title for the project
+                parts: ['Part1', 'Part2', 'Part3', 'Part4']
+            },
+            Week1: { title: "Week 1", parts: ['Part1', 'Part2', 'Part3', 'Part4', 'Part5'] },
+            Week2: { title: "Week 2", parts: ['Part1', 'Part2', 'Part3', 'Part4'] },
+            Week3: { title: "Week 3", parts: ['Part1', 'Part2', 'Part3'] },
+            Week4: { title: "Week 4", parts: ['Part1', 'Part2', 'Part3', 'Part4', 'Part5', 'Part6'] },
+            Week5: { title: "Week 5", parts: ['AllParts'] },
+            Week6: { title: "Week 6", parts: ['Part1', 'Part2', 'Part3'] },
+            Week7: { title: "Week 7", parts: ['Part1', 'Part2', 'Part3', 'Part4'] },
+            Week8: { title: "Week 8", parts: ['Part1', 'Part2', 'Part3', 'Part4'] },
+            Week9: { title: "Week 9", parts: ['Part1', 'Part2', 'Part3&4', 'Part5'] },
+            Week10: { title: "Week 10", parts: ['Part1', 'Part2', 'Part3', 'Part4'] },
+        };
+
+        const basePath = 'ComputerGraphicsE24'; // Base path to your project files
+
+        const projectList = document.getElementById('projectList');
+
+        // Create each week section
+        for (const [key, data] of Object.entries(projects)) {
+            const weekDiv = document.createElement('div');
+            weekDiv.className = 'week';
+
+            const weekHeader = document.createElement('div');
+            weekHeader.className = 'week-header';
+
+            const weekTitle = document.createElement('h2');
+            weekTitle.textContent = data.title;
+            weekHeader.appendChild(weekTitle);
+
+            const toggleButton = document.createElement('button');
+            toggleButton.className = 'toggle';
+            toggleButton.textContent = '+';
+            weekHeader.appendChild(toggleButton);
+
+            const partList = document.createElement('ul');
+            partList.className = 'part-list';
+
+            // Add parts for the week
+            data.parts.forEach(part => {
+                const partItem = document.createElement('li');
+                const link = document.createElement('a');
+                const weekNumber = key.replace(/\D/g, ''); // Extract week number
+
+                let fileName;
+                if (key === 'Project') {
+                    fileName = `planar_reflection_${part.toLowerCase()}.html`;
+                } else if (part === 'AllParts' || part.includes('And')) {
+                    fileName = `${key.toLowerCase()}_${part.toLowerCase()}.html`;
+                } else {
+                    fileName = `worksheet${weekNumber}_${part.toLowerCase()}.html`;
+                }
+
+                link.href = `${basePath}/${key}/${part}/${fileName}`;
+                link.textContent = part;
+                link.target = '_blank';
+                partItem.appendChild(link);
+                partList.appendChild(partItem);
+            });
+
+            weekDiv.appendChild(weekHeader);
+            weekDiv.appendChild(partList);
+            projectList.appendChild(weekDiv);
+
+            // Toggle functionality for expanding and collapsing parts
+            const toggleParts = () => {
+                const isOpen = partList.classList.toggle('open');
+                toggleButton.textContent = isOpen ? '-' : '+';
+            };
+
+            // Allow clicking the header or the entire week div to toggle
+            weekDiv.addEventListener('click', (event) => {
+                if (!event.target.closest('a')) { // Ignore clicks on links
+                    toggleParts();
+                }
+            });
+
+            toggleButton.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent double-toggling when clicking the button
+                toggleParts();
+            });
+        }
+    </script>
 </body>
 </html>

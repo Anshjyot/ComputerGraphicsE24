@@ -1,66 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planar Reflection</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #1e1e1e;
-            color: #ffffff;
-        }
-        canvas {
-            margin-top: 20px;
-            border: 1px solid #ffffff;
-        }
-    </style>
-</head>
-<body>
-    <h1>Planar Reflection</h1>
-    <canvas id="glCanvas" width="512" height="512"></canvas>
-
+    <title>Part 03: Planar Reflector with Stencil Buffer</title>
     <script src="../../../angelCommon/webgl-utils.js"></script>
     <script src="../../../angelCommon/initShaders.js"></script>
     <script src="../../../angelCommon/mv.js"></script>
     <script src="../../../assets/OBJParser.js"></script>
-    <script src="planar_reflection_part4.js"></script>
+    <script src="planar_reflection_part3.js"></script>   
+</head>
 
-    <!-- Vertex Shader -->
+<body onload="main()">
     <script id="vertex-shader" type="x-shader/x-vertex">
-        attribute vec4 vPosition;
-        attribute vec3 vNormal;
-
-        uniform mat4 uModelViewMatrix;
-        uniform mat4 uProjectionMatrix;
-        uniform mat4 uNormalMatrix;
-
-        varying vec3 fNormal;
-        varying vec3 fPosition;
-
+        precision mediump float;
+        
+        attribute vec4 a_position;
+        attribute vec2 a_textureCoords;
+        
+        varying vec2 v_textureCoords;
+        varying vec4 v_position;
+        
+        uniform mat4 u_modelView, u_projection;
+        uniform mat4 u_depthMVP;
+        
         void main() {
-            vec4 pos = uModelViewMatrix * vPosition;
-            fPosition = vec3(pos);
-            fNormal = normalize((uNormalMatrix * vec4(vNormal,0.0)).xyz);
-            gl_Position = uProjectionMatrix * pos;
-        }
+            v_textureCoords = a_textureCoords;
+            v_position = u_depthMVP * a_position;
+            gl_Position = u_projection * u_modelView * a_position;
+        }                                  
     </script>
 
-    <!-- Fragment Shader -->
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
-        varying vec3 fNormal;
-        varying vec3 fPosition;
-
-        uniform vec3 uLightPosition;
-
+        
+        varying vec2 v_textureCoords;
+        varying vec4 v_position;
+        
+        uniform sampler2D u_texture, u_shadow;
+        uniform mat4 u_depthMVP;
+        
         void main() {
-            vec3 normal = normalize(fNormal);
-            vec3 lightDir = normalize(uLightPosition - fPosition);
-            float diffuse = max(dot(normal, lightDir), 0.0);
-            gl_FragColor = vec4(vec3(diffuse), 1.0);
+            vec3 depth = (v_position.xyz / (v_position.w)) * 0.5 + 0.5;
+            float shadowValue = texture2D(u_shadow, depth.xy).r;
+            float shadow = 1.0;
+            if (shadowValue < depth.z) {
+                shadow = 0.5;
+            }
+            vec4 color = texture2D(u_texture, v_textureCoords) * shadow;
+            color.a = 0.8;
+            gl_FragColor = color;
+        }              
+    </script>
+
+    <script id="lighting-vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec3 a_position_model, a_normal_model;
+        
+        varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
+        
+        uniform mat4 u_normal, u_modelView, u_projection;
+        uniform vec3 u_light_world;
+        
+        void main() {
+            vec3 position_camera = (u_modelView * vec4(a_position_model, 1.0)).xyz;
+            v_light_camera = (u_modelView * vec4(u_light_world, 0)).xyz;
+            v_eye_camera = position_camera;
+            v_normal_camera = (u_normal * vec4(a_normal_model, 0)).xyz;
+            
+            gl_Position = u_projection * u_modelView * vec4(a_position_model, 1.0);
         }
     </script>
+
+    <script id="lightning-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
+        
+        void main() {
+            vec3 n = normalize(v_normal_camera);
+            vec3 l = normalize(v_light_camera);
+            vec3 e = normalize(v_eye_camera);
+            vec3 r = normalize(2.0 * dot(l, n) * n - l);
+        
+            // Pearl material
+            vec3 ka = vec3(0.25, 0.20725, 0.20725);
+            vec3 ks = vec3(0.296648, 0.296648, 0.296648);
+            vec3 kd = vec3(1.0, 0.829, 0.829);
+            float shininess = 11.264;
+            
+            vec3 ambient = ka;
+            
+            float cosAngle = dot(l, n);
+            vec3 diffuse = kd * max(cosAngle, 0.0);
+        
+            vec3 specular = ks * pow(max(dot(r, e), 0.0), shininess);
+        
+            if (cosAngle < 0.0) {
+                specular = vec3(0.0);
+            }
+        
+            gl_FragColor = vec4((ambient + diffuse + specular), 1.0);
+        }
+    </script>
+
+    <script id="depth-vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec4 a_position;
+        
+        varying vec4 v_position_camera;
+        
+        uniform mat4 u_modelView, u_projection;
+        
+        void main() {
+            vec4 position_camera = u_projection * u_modelView * a_position;
+            v_position_camera = position_camera; 
+            gl_Position = position_camera;
+        }                      
+    </script>
+
+    <script id="depth-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec4 v_position_camera;
+        
+        void main() {
+            // For depth only. Could store encoded depth if needed.
+            gl_FragColor = vec4(1.0);
+        }                                               
+    </script>
+
+    <canvas id="canvas" width="580" height="580">
+        HTML5 Canvas is not supported.
+    </canvas>
+
+    <br>
+    <button id="button-teapot">Move</button>
+    <button id="button-light">Light</button>
 </body>
 </html>
