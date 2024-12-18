@@ -17,7 +17,7 @@ window.onload = function() {
     var projLoc = gl.getUniformLocation(program, 'uProjectionMatrix');
     gl.uniformMatrix4fv(projLoc, false, flatten(projMatrix));
 
-    readOBJFile('../../../assets/Cup.obj', 0.5, false).then(function (model) {
+    readOBJFile('../../assets/Cup.obj', 0.5, false).then(function (model) {
         if (!model) {
             console.log("Failed to load OBJ file.");
             return;
