@@ -151,16 +151,21 @@
     const weekNumber = key.replace(/\D/g, ''); 
 
     let fileName;
+
     if (key === 'Project') {
+   
         fileName = `planar_reflection_${part.toLowerCase()}.html`;
-    } else if (key === 'Week5' && part === 'AllParts') { 
-    
+        link.href = `${basePath}/${key}/${part}/${fileName}`;
+    } else if (key === 'Week5' && part === 'AllParts') {
+
         fileName = `worksheet${weekNumber}_AllParts.html`;
         link.href = `${basePath}/${key}/${fileName}`;
-    } else if (part.includes('And')) {
+    } else if (part.toLowerCase().includes('and')) {
+     
         fileName = `${key.toLowerCase()}_${part.toLowerCase()}.html`;
         link.href = `${basePath}/${key}/${part}/${fileName}`;
     } else {
+   
         fileName = `worksheet${weekNumber}_${part.toLowerCase()}.html`;
         link.href = `${basePath}/${key}/${part}/${fileName}`;
     }
@@ -170,6 +175,7 @@
     partItem.appendChild(link);
     partList.appendChild(partItem);
 });
+
 
 
             weekDiv.appendChild(weekHeader);
