@@ -17,7 +17,7 @@
         uniform mat4 uModelViewMatrix;
 
         void main() {
-            // Set color based on position (c = 0.5 * p + 0.5)
+
             fColor = vec4(0.5 * vPosition.xyz + 0.5, 1.0);
             gl_Position = uProjectionMatrix * uModelViewMatrix * vPosition;
         }

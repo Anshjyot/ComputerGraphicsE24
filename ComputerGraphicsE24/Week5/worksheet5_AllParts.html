@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Worksheet 5 - Part 2: Cup</title>
+    <title>Worksheet 5 </title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,7 +36,7 @@
     </style>
 </head>
 <body>
-    <h1>Worksheet 5 - Part 2: Cup</h1>
+    <h1>Worksheet 5 </h1>
     <canvas id="glCanvas" width="512" height="512"></canvas>
     
     <div class="controls">
@@ -47,10 +47,10 @@
         <button id="toggleOrbit">Toggle Orbit</button>
     </div>
 
-    <script src="../../../angelCommon/webgl-utils.js"></script>
-    <script src="../../../angelCommon/initShaders.js"></script>
-    <script src="../../../angelCommon/MV.js"></script>
-    <script src="../../../assets/OBJParser.js"></script>
+    <script src="../../angelCommon/webgl-utils.js"></script>
+    <script src="../../angelCommon/initShaders.js"></script>
+    <script src="../../angelCommon/MV.js"></script>
+    <script src="../../assets/OBJParser.js"></script>
     <script src="worksheet5_AllParts.js"></script>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
@@ -88,7 +88,7 @@
             vec3 lightDir = normalize(uLightDirection);
             vec3 viewDir = normalize(-fPosition); 
 
-            // Phong reflection model
+          
             float ambient = uKa;
             float diffuse = max(dot(normal, lightDir), 0.0);
             vec3 reflectDir = reflect(-lightDir, normal);
